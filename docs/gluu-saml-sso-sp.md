@@ -1,4 +1,4 @@
-# SP initiated Single Sign On for Gluu Solo
+# SP initiated SAML flow for Gluu Solo
 
 This article will guide you through the process of a Service Provider (SP) initiated SAML flow for Single Sign On using Gluu as the Identity Provider (IDP). We will be using a locally run Flask application as the SP, which is the [python3-saml](https://github.com/onelogin/python3-saml) library's Flask demo application, modified for our needs. This was tested on Gluu Server 4.4.
 
