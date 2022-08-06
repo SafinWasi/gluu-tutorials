@@ -123,7 +123,7 @@ Now, navigate to `https://localhost:5000/metadata/` and you should see an XML fi
     - `Support Unspecified NameIdFormat?`: Yes
     - Under Available NameID Formats, select `SAML:2.0:nameid-format:transient` and click add
     - Click Save
-- Now you need to release additional attributes from the right hand side pane. Click on an attribute to release it to the SP. For this example we will release Email and TransientID. 
+- Now you need to release additional attributes from the right hand side pane. Click on an attribute to release it to the SP. For this example we will release Email and TransientID. It's always a good idea to release TransientID, because the Gluu server will use it as the default NameID. This is a session identifier and does not release any personal information about the subject.
 - Finally, click `Add` and then `Activate`. It will take a few minutes for Shibboleth to load your new trust relationship, so please wait.
 
 
@@ -145,5 +145,6 @@ In my case, the Flask application was using a NameID format that was not recogni
 
 ## References
 - [Gluu 4.4 Documentation](https://gluu.org/docs/gluu-server/4.4/)
+- [OneLogin's SAML Python Toolkit](https://github.com/onelogin/python3-saml)
 - [SP initiated SAML flow tutorial](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/tutorials/SAML-SSO-with-Gluu-Shibboleth-SP-Initiated-Flow.md) by [kdhttps](https://github.com/kdhttps)
 - [Securing the Perimeter](https://www.amazon.com/Securing-Perimeter-Deploying-Identity-Management/dp/1484226003) by Michael Schwartz
