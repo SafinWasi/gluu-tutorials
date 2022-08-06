@@ -135,3 +135,8 @@ With everything set up, start the Flask application and navigate to `http://loca
 Now you can log in with your Gluu server user credentials. If everything runs okay, you will be redirected back to the Flask application which will display the attributes you released.
 
 ![flask-attributes]()
+
+## References
+- [Gluu 4.4 Documentation](https://gluu.org/docs/gluu-server/4.4/)
+- [SP initiated SAML flow tutorial](https://github.com/GluuFederation/tutorials/blob/master/oidc-sso-tutorials/tutorials/SAML-SSO-with-Gluu-Shibboleth-SP-Initiated-Flow.md) by [kdhttps](https://github.com/kdhttps)
+- [Securing the Perimeter](https://www.amazon.com/Securing-Perimeter-Deploying-Identity-Management/dp/1484226003) by Michael Schwartz
