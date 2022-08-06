@@ -15,10 +15,9 @@ This article will guide you through the process of a Service Provider (SP) initi
 4. And cd to the Flask demo folder: `cd python3-saml/demo-flask`
 
 ## Configuring the Flask application
-The `index.py` file in this folder is the Flask application that we will be using to demonstrate the SP initiated flow. Inside the `saml/` folder, there is a file called `settings.json` that will contain the majority of the settings for the application. This file is in the JSON format, with two distinct dictionary objects: `sp` and `idp`. These contain the corresponding settings for the SP and the IDP. For the SP, since we are running Flask on our local machine, we will want to replace the hostname with our localhost. Since Flask runs on port 8000 by default, we replace `<sp_domain>` with `localhost:8000`. Be sure to replace `https` with `http` since we don't have TLS implemented locally. 
+The `index.py` file in this folder is the Flask application that we will be using to demonstrate the SP initiated flow. For the test, I will rename it to `app.py` so that we can directly execute Flask from the command line. Inside the `saml/` folder, there is a file called `settings.json` that will contain the majority of the settings for the application. This file is in the JSON format, with two distinct dictionary objects: `sp` and `idp`. These contain the corresponding settings for the SP and the IDP. For the SP, since we are running Flask on our local machine, we will want to replace the hostname with our localhost. Since Flask runs on port 5000 by default, we replace every instance of `<sp_domain>` with `https://localhost:5000`.
 
-
-For the IDP section, we can use a Metadata XML exchange. Python3-saml contains a class that can parse and update settings dynamically from a remote XML file. The code is as follows, which should be executed in the same directory as the `settings.json` file:
+Once you're done editing the SP section, for the IDP section, we can use a Metadata XML exchange. Python3-saml contains a class that can parse and update settings dynamically from a remote XML file. The code is as follows, which should be executed in the same directory as the `settings.json` file:
 
 ```python
 from onelogin.saml2.idp_metadata_parser import OneLogin_Saml2_IdPMetadataParser
@@ -35,23 +34,24 @@ newSettings = OneLogin_Saml2_IdPMetadataParser.merge_settings(old, remote)
 with open("settings.json", 'w') as f:
     f.write(json.dumps(newSettings, indent=4))
 ```
-I used `validate_cert=False` because my Gluu server was using a self-signed certificate and so didn't support HTTPS. This **will** overwrite the old `settings.json` file, so be sure to make a backup if you want. Finally, our settings.json looks like this:
+I used `validate_cert=False` because my Gluu server was using a self-signed certificate and so didn't support HTTPS. This **will** overwrite the old `settings.json` file, so be sure to make a backup if you want. Finally, you will want to edit the `"NameIdFormat"` key value to `"urn:oasis:names:tc:SAML:2.0:nameid-format:transient"`. This is to ensure our SAML requests are using a NameID format known to the Gluu server.
+After the edits, our `settings.json` looks like this:
 
 ```json
 {
     "strict": true,
     "debug": true,
     "sp": {
-        "entityId": "http://localhost:8000/metadata/",
+        "entityId": "https://localhost:5000/metadata/",
         "assertionConsumerService": {
-            "url": "http://localhost:8000/?acs",
+            "url": "https://localhost:5000/?acs",
             "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
         },
         "singleLogoutService": {
-            "url": "http://localhost:8000/?sls",
+            "url": "https://localhost:5000/?sls",
             "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
         },
-        "NameIDFormat": "urn:mace:shibboleth:1.0:nameIdentifier",
+        "NameIDFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
         "x509cert": "",
         "privateKey": ""
     },
@@ -77,7 +77,7 @@ I used `validate_cert=False` because my Gluu server was using a self-signed cert
 }
 ```
 
-I didn't need to configure anything additional in `advanced-settings.json`. However, the metadata file expires in 2 days by default. If you don't want to keep regenerating it you can add this key-value pair to this file:
+I didn't need to configure anything additional in `demo-flask/saml/advanced-settings.json`. However, the metadata file expires in 2 days by default. If you don't want to keep regenerating it you can add this key-value pair to this file:
 
 ```json
 {
@@ -95,13 +95,13 @@ Next, we need to generate a private key and its corresponding self-signed certif
 ```bash
 openssl req -new -x509 -days 3652 -nodes -out sp.crt -keyout sp.key
 ```
-
+We will also be using this key pair for HTTPS on our Flask instance.
 ## Adding a trust relationship in Gluu Server
-For the next step, we will need to obtain the Flask application's metadata XML file. In the `demo-flask` folder, execute `python index.py`. This should load the settings file and start the Flask application. Navigate to `http://localhost:8000` on your web browser and you should see the following screen:
+For the next step, we will need to obtain the Flask application's metadata XML file. In the `demo-flask` folder, execute `flask run --cert=saml/certs/sp.crt --key=saml/certs/sp.key`. This should load the settings file and start the Flask application. Navigate to `https://localhost:5000` on your web browser and you should see the following screen:
 
 ![onelogin homepage]()
 
-Now, navigate to `http://localhost:8000/metadata/` and you should see an XML file. Save it to your local storage. Then, log on to your Gluu server's oxTrust GUI and navigate to `SAML` > `Add Trust Relationships`. Use the following details:
+Now, navigate to `https://localhost:5000/metadata/` and you should see an XML file. Save it to your local storage. Then, log on to your Gluu server's oxTrust GUI and navigate to `SAML` > `Add Trust Relationships`. Use the following details:
 
 - `Display Name`: choose an appropriate name
 - `Description`: any description
@@ -123,12 +123,12 @@ Now, navigate to `http://localhost:8000/metadata/` and you should see an XML fil
     - `Support Unspecified NameIdFormat?`: Yes
     - Under Available NameID Formats, select `SAML:2.0:nameid-format:transient` and click add
     - Click Save
-- Now you need to release additional attributes from the right hand side pane. Click on an attribute to release it to the SP. For this example we will release Username, Email and TransientID. 
+- Now you need to release additional attributes from the right hand side pane. Click on an attribute to release it to the SP. For this example we will release Email and TransientID. 
 - Finally, click `Add` and then `Activate`. It will take a few minutes for Shibboleth to load your new trust relationship, so please wait.
 
 
 ## Testing SP initiated flow
-With everything set up, start the Flask application and navigate to `http://localhost:8000`. You should see the login screen as mentioned before. Click on `Login` and you should be redirected to your Gluu server's oxAuth login page.
+With everything set up, start the Flask application and navigate to `https://localhost:5000`. You should see the login screen as mentioned before. Click on `Login` and you should be redirected to your Gluu server's oxAuth login page.
 
 ![gluu-login]()
 
