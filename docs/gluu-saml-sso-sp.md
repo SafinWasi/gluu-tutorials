@@ -1,6 +1,6 @@
 # SP initiated SAML flow for Gluu Solo
 
-This article will guide you through the process of a Service Provider (SP) initiated SAML flow for Single Sign On using Gluu as the Identity Provider (IDP). We will be using a locally run Flask application as the SP, which is the [python3-saml](https://github.com/onelogin/python3-saml) library's Flask demo application, modified for our needs. This was tested on Gluu Server 4.4.
+This article will guide you through the process of a Service Provider (SP) initiated SAML flow for Single Sign On using Gluu as the Identity Provider (IDP). We will be using a locally run Flask application as the SP, which is the [python3-saml](https://github.com/onelogin/python3-saml) library's Flask demo application. This was tested on Gluu Server 4.4.
 
 ## Requirements
 - Python3
@@ -135,6 +135,13 @@ With everything set up, start the Flask application and navigate to `https://loc
 Now you can log in with your Gluu server user credentials. If everything runs okay, you will be redirected back to the Flask application which will display the attributes you released.
 
 ![flask-attributes]()
+
+## Debugging
+Working with SAML can be a tedious process if something goes wrong. In case things don't work, there are a few steps you can take to try to diagnose the issue:
+- Check the Shibboleth IDP logs at `/opt/shibboleth-idp/logs/idp-process.log` of your Gluu chroot container.
+- Use your browser to intercept SAML requests. This is only useful if your SAML requests are unencrypted; however, you can sometimes get an idea of what is happening by looking at the GET and POST request headers and responses and decoding them from Base64. 
+
+In my case, the Flask application was using a NameID format that was not recognized by Shibboleth IDP. The logs mentioned this in the form of a warning: `Profile Action AddNameIDToSubjects: Request specified use of an unsupportable identifier format: urn:mace:shibboleth:1.0:nameIdentifier`. This led me to being able to changing the NameID format in `settings.json` which solved the issue.
 
 ## References
 - [Gluu 4.4 Documentation](https://gluu.org/docs/gluu-server/4.4/)
