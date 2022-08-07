@@ -1,7 +1,6 @@
 import json
 from flask import Flask, render_template, redirect, request
 from client import Client
-from extras import print_json
 
 app = Flask(__name__)
 

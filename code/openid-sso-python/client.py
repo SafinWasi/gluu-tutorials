@@ -1,6 +1,4 @@
 import requests
-from extras import print_json
-
 
 class Client:
     def __init__(self, config):
