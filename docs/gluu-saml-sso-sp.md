@@ -2,6 +2,8 @@
 
 This article will guide you through the process of a Service Provider (SP) initiated SAML flow for Single Sign On using Gluu as the Identity Provider (IDP). We will be using a locally run Flask application as the SP, which is the [python3-saml](https://github.com/onelogin/python3-saml) library's Flask demo application. This was tested on Gluu Server 4.4.
 
+## Introduction
+When dealing with Single Sign On using SAML, the application or website that the client uses to access protected resources is called the SP (Service Provider). On the other hand, the server that authenticates the client and grants access to protected resources is called the IDP (Identity Provider). In an SP initiated flow, the SP sends a SAML authentication request to the IDP using preestablished configurations. The browser then initiates an OpenID connect code flow with the IDP and prompts the user for login. Upon verifying credentials, the IDP returns a SAML assertion with the attributes released for the user. 
 ## Requirements
 - Python3
 - Pip3
