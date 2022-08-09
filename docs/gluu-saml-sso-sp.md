@@ -33,7 +33,7 @@ with open("settings.json", "r") as f:
 remote = OneLogin_Saml2_IdPMetadataParser.parse_remote(HOSTNAME, validate_cert=False)
 newSettings = OneLogin_Saml2_IdPMetadataParser.merge_settings(old, remote)
 
-with open("settings.json", 'w') as f:
+with open("settings.json", "w") as f:
     f.write(json.dumps(newSettings, indent=4))
 ```
 I used `validate_cert=False` because my Gluu server was using a self-signed certificate and so didn't support HTTPS. This **will** overwrite the old `settings.json` file, so be sure to make a backup if you want. Finally, you will want to edit the `"NameIdFormat"` key value to `"urn:oasis:names:tc:SAML:2.0:nameid-format:transient"`. This is to ensure our SAML requests are using a NameID format known to the Gluu server.
