@@ -101,7 +101,7 @@ We will also be using this key pair for HTTPS on our Flask instance.
 ## Adding a trust relationship in Gluu Server
 For the next step, we will need to obtain the Flask application's metadata XML file. In the `demo-flask` folder, execute `flask run --cert=saml/certs/sp.crt --key=saml/certs/sp.key`. This should load the settings file and start the Flask application. Navigate to `https://localhost:5000` on your web browser and you should see the following screen:
 
-![onelogin homepage]()
+![onelogin-homepage]()
 
 Now, navigate to `https://localhost:5000/metadata/` and you should see an XML file. Save it to your local storage. Then, log on to your Gluu server's oxTrust GUI and navigate to `SAML` > `Add Trust Relationships`. Use the following details:
 
