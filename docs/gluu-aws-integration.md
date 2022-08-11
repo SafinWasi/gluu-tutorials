@@ -1,6 +1,6 @@
 # SCIM support on Gluu Solo for external SSO
 
-This article will guide you through setting up SCIM on your Gluu Solo instance, in order to create/modify/delete users that can seamlessly use Single-Sign-On (SSO) on an external application. For this example, we will be using Gluu Solo 4.4 with Amazon Web Services as the external application.
+This article will guide you through setting up SCIM on your Gluu Solo instance, in order to create/modify/delete users that can seamlessly use Single-Sign-On (SSO) on an external application. For this example, we will be using Gluu Solo 4.4.0.Final with Amazon Web Services as the external application.
 
 ## Table of contents
 
@@ -17,36 +17,14 @@ This article will guide you through setting up SCIM on your Gluu Solo instance, 
 
 ## Requirements
 
-1. A working Gluu installation with Shibboleth IDP and the SCIM API installed and enabled
+1. A working Gluu Solo instance
 2. An AWS account with administrative priviledges
 3. An email address associated with an AWS account that you want to SSO with
-4. A way to craft SCIM requests for an endpoint protected by [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749). If you are using Java, we recommend using [scim-client](https://github.com/GluuFederation/scim/tree/master/scim-client).
+4. A way to craft SCIM requests for an endpoint protected by [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749).
 
 ## Preparing the Gluu Server
 
-To begin, ensure the Shibboleth IDP and SCIM are installed and enabled on your Gluu installation. During a fresh install, you can choose both of these to be installed. For an existing install, log onto your Gluu container and refer to the following commands.
-
-```bash
-
-cd /install/community-edition-setup/
-
-```
-
-For Shibboleth:
-
-```bash
-
-./setup.py --install-shib
-
-```
-
-For SCIM:
-
-```bash
-
-./setup.py --install-scim
-
-```
+To begin, ensure the Shibboleth IDP and SCIM are installed and enabled on your Gluu installation. On Gluu Solo, both of these are installed by default.
 
 Next, we need to enable the SCIM API. Log onto the oxTrust GUI, go to `Organization` > `Organization Configuration` and check the tick mark for `SCIM Support`.
 
@@ -235,22 +213,23 @@ First, we need to get some values from our AWS account. Log onto AWS.
     ![new-user-done](../assets/new-user-done.png)
 
 ## Testing SSO
-Before using SCIM, we recommend testing out the SAML flow to SSO onto Amazon. To do this, simply visit `https://<hostname>/idp/profile/SAML2/Unsolicited/SSO?providerId=urn:amazon:webservices` and use your new Gluu user. You should be able to log onto AWS without any additional steps.
-
-## Setup for SCIM
-Communicating with a SCIM endpoint that is protected by OAuth is not a simple task. There are several registration and authentication steps involved because of security concerns. The [scim-client](https://github.com/GluuFederation/scim/tree/master/scim-client) Java library simplifies some steps, but some preparation is required. For this example, we will be using private key authentication using OpenID. In order to do this we need the following things:
-
-1. An RSA key pair and an associated certificate for our client and the Gluu server to communicate through.
-2. A [Java keystore](https://docs.oracle.com/cd/E19509-01/820-3503/ggffo/index.html) JKS file that contains the private key and the associated certificate (or chain).
-3. The public key of the key pair in [JSON web key](https://datatracker.ietf.org/doc/html/rfc7517) format, preferably saved to a file. 
-4. The SSL certificate of our Gluu server, which can be found at `/opt/gluu-server/etc/certs/httpd.crt`. You can obtain this by using `scp`.
+Before using SCIM, we recommend testing out the SAML flow to SSO onto Amazon. To do this, simply visit `https://<hostname>/idp/profile/SAML2/Unsolicited/SSO?providerId=urn:amazon:webservices` and use your new Gluu user. This will start an IDP initiated SAML flow, which will allow you to log onto AWS without any additional steps.
 
 ### Steps involving a SCIM query
-0. If this is the first time a query is being made, the requesting party registers a new client with the Gluu server using OpenID connect [dynamic client registration](https://openid.net/specs/openid-connect-registration-1_0.html). The public key for the client is uploaded to the server at this time. The requesting party obtains a Client ID, which will be used for subsequent steps.
-1. The client requests an OAuth access token using the Client ID and its private key, and obtains an access token from the token endpoint.
+
+Communicating with a SCIM endpoint that is protected by OAuth is not a trivial setup. There are several authentication steps involved due to security concerns. The process is simplified to the following steps:
+
+0. If this is the first time a query is being made, the requesting party registers a new client with the Gluu server using OpenID Connect [dynamic client registration](https://openid.net/specs/openid-connect-registration-1_0.html) with the appropriate [scopes](https://gluu.org/docs/gluu-server/4.4/user-management/scim2/#client-scopes). The RP will choose an OAuth authorization flow to obtain access tokens. The [client_credentials](https://www.rfc-editor.org/rfc/rfc6749#section-4.4) flow is the easiest to use and so this is the recommended option.
+1. The client requests an OAuth access token using some OpenID Connect authentication method. Supported methods are `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, and `private_key_jwt`. For more security, asymmetric key authentication is recommended. Please refer to [OpenID Connect Client Authentication](https://openid.net/specs/openid-connect-core-1_0-15.html#ClientAuthentication) for more details.
 2. This access token is used to make SCIM queries.
 
-Steps 1 and 2 can be automated by `scim-client`. The manual preparation is needed for step 0.
+For this example, we will be using the Java `scim-client` with `client_credentials` and `private_key_jwt`. Please choose a method that is suitable for your production environment.
+## Setup for scim-client
+
+1. An [RS256](https://www.rfc-editor.org/rfc/rfc7518#section-3.3) key pair and an associated certificate for our client and the Gluu server to communicate through.
+2. A keystore file that contains the private key and the associated certificate (or chain). You may use [PKCS12](https://www.rfc-editor.org/rfc/rfc7292) or [JKS](https://docs.oracle.com/cd/E19509-01/820-3503/ggfen/index.html).
+3. The public key of the key pair in [JSON web key](https://datatracker.ietf.org/doc/html/rfc7517) format, preferably saved to a file. 
+4. The SSL certificate of our Gluu server, which can be found at `/opt/gluu-server/etc/certs/httpd.crt`. You can obtain this by using `scp`.
 
 ### Generating keys
 You will need Java 11 (and keytool) along with OpenSSL installed on your machine. Run the following command in a new directory to generate a private key; enter a passcode when prompted and remember it.
@@ -273,21 +252,16 @@ You should now have three files:
 - public-key.pem
 - cert.pem
 
-### Creating new Java keystore
+### Creating new keystore
 First we need to concatenate the private key and certificate to one file.
 ```
 cat private-key.pem cert.pem > import.pem
 ```
 Next, we need to convert this file to a PKCS12 keystore.
 ```
-openssl pkcs12 -export -in import.pem -name bob > server.p12
+openssl pkcs12 -export -in import.pem -name bob > client-keystore.pkcs12
 ```
 Replace `bob` with some name you can remember. It will prompt you for the private key password, then a new password for the PKCS12 keystore.
-Finally, we use keytool to create a new Java keystore and import:
-```
-keytool -importkeystore -srckeystore server.p12 -destkeystore client-keystore.jks -srcstoretype pkcs12 -alias bob
-```
-For `alias`, choose whatever name you originally chose for the PKCS12 keystore. For us it is still `bob` and so that's what we chose. Enter the source keystore password when prompted, and then the new password for the destination keystore.
 
 ### Creating a JSON web key set
 1. Visit https://russelldavies.github.io/jwk-creator/.
@@ -299,7 +273,7 @@ For `alias`, choose whatever name you originally chose for the PKCS12 keystore. 
 3. Click `Convert`,  and save the output on the right to a file. Name it `client-key.jwks`.
 
 At this point you should have the following files:
-- `client-keystore.jks`
+- `client-keystore.pkcs12`
 - `client-key.jwks`
 
 ### Dynamic Client Registration using OpenID connect

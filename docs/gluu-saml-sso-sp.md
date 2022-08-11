@@ -7,7 +7,7 @@ When dealing with Single Sign On using SAML, the application or website that the
 ## Requirements
 - Python3
 - Pip3
-- Gluu server installation with the [Shibboleth SAML IDP](https://gluu.org/docs/gluu-server/operation/faq/#adding-passportjs-andor-shibboleth-idp-post-installation) and [Passport](https://gluu.org/docs/gluu-server/authn-guide/inbound-saml-passport/#enable-passport) installed and enabled.
+- Gluu Solo installation with the [Shibboleth SAML IDP](https://gluu.org/docs/gluu-server/operation/faq/#adding-passportjs-andor-shibboleth-idp-post-installation) and [Passport](https://gluu.org/docs/gluu-server/authn-guide/inbound-saml-passport/#enable-passport) installed and enabled.
 
 ## Preparations
 1. Create a virtual environment in Python: `python -m venv venv`
