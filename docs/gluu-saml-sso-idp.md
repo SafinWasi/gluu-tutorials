@@ -1,6 +1,6 @@
 # IDP initiated SAML flow for Gluu Solo
 
-This article will guide you through the process of an Identity Provider (IDP) initiated SAML flow for Single Sign On using Gluu as the Identity Provider (IDP). This is a niche use case, and unless you explicitly need support for this, you should use an [SP initiated flow]().
+This article will guide you through the process of an Identity Provider (IDP) initiated SAML flow for Single Sign On using Gluu as the Identity Provider (IDP). This is a niche use case, and unless you explicitly need support for this, you should use an [SP initiated flow](https://github.com/SafinWasi/gluu-tutorials/blob/master/docs/gluu-saml-sso-sp.md).
 
 ## Introduction
 In an IDP initiated SAML flow, the IDP sends an unsolicited SAML response to the SP, without the SP having to request anything. In this sort of flow, the URL usually contains the `unsoliticed` keyword. There are some use cases for this, primarily for compatibility with legacy systems. A banking site may use an external service to handle foreign currencies. The customer clicks on a link that takes them to an external website to buy foreign currencies. In this case, an unsolicited SAML response is created by the IDP (banking site) and sent to the third party SP (foreign currency site) which can validate the assertion and provide the service.
@@ -8,7 +8,7 @@ In an IDP initiated SAML flow, the IDP sends an unsolicited SAML response to the
 However, there are drawbacks to this. When an SP receives an unsolicited SAML response, it has no idea where to redirect the user after validation. This would require manual configuration for every incoming unsolicited SAML response, which reduces interoperability. IDP initiated flow has been depracated in OAuth and OpenID connect using the state parameter.
 
 ## Requirements
-- Completion of the [SP initiated flow tutorial]() 
+- Completion of the [SP initiated flow tutorial](https://github.com/SafinWasi/gluu-tutorials/blob/master/docs/gluu-saml-sso-sp.md) 
 **OR**
 - Completion of the [AWS integration tutorial](https://gluu.org/docs/gluu-server/4.4/integration/saas/aws/).
 
