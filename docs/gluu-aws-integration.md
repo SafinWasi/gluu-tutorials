@@ -9,7 +9,7 @@ This article will guide you through setting up SCIM on your Gluu Solo instance, 
 3. [Configuring AWS to accept SAML requests](#configuring-aws-to-accept-saml-requests)
 4. [Creating a Trust relationship in Gluu Server](#create-trust-relationship-in-gluu-server)
 5. [Creating a test user manually](#create-the-test-user-manually)
-6. [Setup for SCIM](#setup-for-scim)
+6. [Setup for SCIM Client](#setup-for-scim-client)
 7. [Setting up scim-client](#setting-up-scim-client)
 8. [Creating user for SSO through SCIM](#creating-user-for-sso-through-scim)
 9. [Updating a user](#updating-a-user)
@@ -32,7 +32,7 @@ Next, we need to enable the SCIM API. Log onto the oxTrust GUI, go to `Organizat
 
 After that, navigate to `Configuration` > `JSON Configuration` > `OxTrust Configuration`, locate the `Scim Properties` section (use Ctrl + F and search for `Scim`) and set the protection mode to `OAUTH`. Then save the configuration at the bottom of the page.
 
-- This article assumes that we are using the OAuth2 protection scheme. For testing purposes, you may use the `TEST` scheme, which is unprotected and can be queried without any authentication; however, this is not recommended in a production environment.
+- This article assumes that we are using the OAuth 2.0 protection scheme. For testing purposes, you may use the `TEST` scheme, which is unprotected and can be queried without any authentication; however, this is not recommended in a production environment.
 
 ![Protection scheme](../assets/protection-mode.png)
 
@@ -223,7 +223,7 @@ Communicating with a SCIM endpoint that is protected by OAuth is not a trivial s
 1. The client requests an OAuth access token using some OpenID Connect authentication method. Supported methods are `client_secret_basic`, `client_secret_post`, `client_secret_jwt`, and `private_key_jwt`. For more security, asymmetric key authentication is recommended. Please refer to [OpenID Connect Client Authentication](https://openid.net/specs/openid-connect-core-1_0-15.html#ClientAuthentication) for more details.
 2. This access token is used to make SCIM queries.
 
-For this example, we will be using the Java `scim-client` with `client_credentials` and `private_key_jwt`. Please choose a method that is suitable for your production environment.
+For this example, we will be using the Java `scim-client` with `client_credentials` and `private_key_jwt`. Please choose a method that is suitable for your production environment. If you are using your own client, please refer to [Gluu SCIM documentation](https://gluu.org/docs/gluu-server/4.4/api-guide/api-reference/#scim).
 ## Setup for scim-client
 
 1. An [RS256](https://www.rfc-editor.org/rfc/rfc7518#section-3.3) key pair and an associated certificate for our client and the Gluu server to communicate through.
@@ -277,7 +277,7 @@ At this point you should have the following files:
 - `client-key.jwks`
 
 ### Dynamic Client Registration using OpenID connect
-For your convenience, I have created a Python script for you which can automate this process. Visit https://github.com/SafinWasi/gluu_openid_python and follow the instructions in the README. The script can either use the JWKS file or not, but for this tutorial we will be using the JWKS file. Once it's done, you should have a `client.json` file that contains the Client ID and secret. Do not share this information.
+For your convenience, I have created a Python script for you which can automate this process. Visit https://github.com/SafinWasi/gluu_openid_python and follow the instructions in the README. The script can either use a JWKS and set the authentication method to `private_key_jwt`, or it may not and use `client_secret_basic`. Once it's done, you should have a `client.json` file that contains the Client ID and secret. Do not share this information.
 
 If you wish to do this manually, please refer to [Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html).
 
@@ -290,7 +290,7 @@ By default, the new client does not have access to SCIM scopes. To allow this:
 You may add scopes to the client as you need. For a full list, visit `Scopes` in oxTrust. For our example, we will add `https://gluu.org/scim/users.read`, which is for querying and searching user resources.
 
 ## Setting up scim-client
-For this article, we will be using [scim-client](https://github.com/GluuFederation/scim/tree/master/scim-client) version 4.4.0. Ideally, you will want to use the version that is the same as your Gluu server. Requisites for using scim-client in OAuth mode are as follows:
+For this article, we will be using [scim-client](https://github.com/GluuFederation/scim/tree/master/scim-client) version 4.4.0.Final. Ideally, you will want to use the version that is the same as your Gluu server. Requisites for using scim-client in OAuth mode are as follows:
 
 - Entry-level knowledge of Java is enough. Make sure you have Java 11 or higher installed. The use of Maven as a build tool is recommended.
 - Add the SSL certificate of your Gluu server to the cacerts keystore of your local Java installation. If you are using a self-signed certificate, you can find it at `/opt/gluu-server/etc/certs/httpd.crt`. You can add this to your cacerts keystore with the following command:
@@ -298,7 +298,7 @@ For this article, we will be using [scim-client](https://github.com/GluuFederati
     # keytool -importcert -trustcacerts -cacerts -file httpd.crt
     ```
 - Online Java-docs for scim-client are available [here](https://maven.gluu.org/javadocs/scim/version_4.4.0/client/). You can generate java-docs locally too using Maven; just run `mvn javadoc:javadoc -pl scim-client`.
-- Create a simple project in your Java IDE. There are two ways of using scim-client: obtain the JAR file [here](https://maven.gluu.org/maven/org/gluu/scim-client/), or use Maven. If you choose to obtain the JAR file, import it as an external dependency. If you're using Maven, add the following snippets to your  `pom.xml`:
+- Create a simple project in your Java IDE. There are two ways of using scim-client: obtain the JAR file [here](https://maven.gluu.org/maven/org/gluu/scim-client/), or use Maven. If you choose to obtain the JAR file, import it as an external dependency. If you're using Maven, add the following snippets to your `pom.xml`:
     ```xml
     <properties>
         <scim.client.version>4.4.0.Final</scim.client.version>
@@ -342,7 +342,7 @@ For this article, we will be using [scim-client](https://github.com/GluuFederati
         private String domainURL = "https://<host-name>/identity/restv1";
         private String OIDCMetadataUrl = "https://<host-name>/.well-known/openid-configuration";
         private String clientId = "<your client ID>";
-        private String keyPath = "<path to your Java keystore file>";
+        private String keyPath = "<path to your keystore file>";
         Path path = Paths.get(keyPath);
         private String keyStorePassword = "<your keystore password>";
         private String keyId = "<alias for the key in your keystore>";
