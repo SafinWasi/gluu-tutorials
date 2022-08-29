@@ -101,7 +101,7 @@ We will also be using this key pair for HTTPS on our Flask instance.
 ## Adding a trust relationship in Gluu Server
 For the next step, we will need to obtain the Flask application's metadata XML file. In the `demo-flask` folder, execute `flask run --cert=saml/certs/sp.crt --key=saml/certs/sp.key`. This should load the settings file and start the Flask application. Navigate to `https://localhost:5000` on your web browser and you should see the following screen:
 
-![onelogin-homepage](../assets/onelogin-homepage.png)
+![onelogin-homepage](../assets/sso-sp/onelogin-homepage.png)
 
 Now, navigate to `https://localhost:5000/metadata/` and you should see an XML file. Save it to your local storage. Then, log on to your Gluu server's oxTrust GUI and navigate to `SAML` > `Add Trust Relationships`. Use the following details:
 
@@ -132,11 +132,11 @@ Now, navigate to `https://localhost:5000/metadata/` and you should see an XML fi
 ## Testing SP initiated flow
 With everything set up, start the Flask application and navigate to `https://localhost:5000`. You should see the login screen as mentioned before. Click on `Login` and you should be redirected to your Gluu server's oxAuth login page.
 
-![gluu-login](../assets/gluu-login.png)
+![gluu-login](../assets/sso-sp/gluu-login.png)
 
 Now you can log in with your Gluu server user credentials. If everything runs okay, you will be redirected back to the Flask application which will display the attributes you released.
 
-![flask-attributes](../assets/flask-attributes.png)
+![flask-attributes](../assets/sso-sp/flask-attributes.png)
 
 ## Debugging
 Working with SAML can be a tedious process if something goes wrong. In case things don't work, there are a few steps you can take to try to diagnose the issue:

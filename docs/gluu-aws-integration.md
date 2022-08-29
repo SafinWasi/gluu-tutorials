@@ -34,7 +34,7 @@ After that, navigate to `Configuration` > `JSON Configuration` > `OxTrust Config
 
 - This article assumes that we are using the OAuth 2.0 protection scheme. For testing purposes, you may use the `TEST` scheme, which is unprotected and can be queried without any authentication; however, this is not recommended in a production environment.
 
-![Protection scheme](../assets/protection-mode.png)
+![Protection scheme](../assets/aws/protection-mode.png)
 
 Our Gluu server is now ready to accept authorized SCIM requests.
 
@@ -81,7 +81,7 @@ Next, we need to add two custom attribute types to our Gluu LDAP.
     - Status: Active
     - Click `Register`
 
-        ![RoleEntitlement](../assets/roleentitlement.png)
+        ![RoleEntitlement](../assets/aws/roleentitlement.png)
 
 6. For the second attribute:
     - Name: `RoleSessionName`
@@ -91,7 +91,7 @@ Next, we need to add two custom attribute types to our Gluu LDAP.
 
     Every other field will have the same values as the first attribute.
 
-    ![RoleSessionName](../assets/roleSessionName.png)
+    ![RoleSessionName](../assets/aws/roleSessionName.png)
 
 7. If everything is successful, these two attributes will successfully be saved and will show up under the `Attributes` tab. If you get an error saying the attributes don't exist, there was probably an error in your custom schema doc. Refer to the logs for more information.
 
@@ -106,7 +106,7 @@ Next, we need to add two custom attribute types to our Gluu LDAP.
     - Metadata document: Upload the XML file you downloaded.
     - Click `Add Provider` at the bottom.
 
-    ![AWS IAM](../assets/aws-iam.png)
+    ![AWS IAM](../assets/aws/aws-iam.png)
 
 4. Create a role associated with the new IDP with the following steps:
     - On the left hand pane, choose `Roles`
@@ -115,7 +115,7 @@ Next, we need to add two custom attribute types to our Gluu LDAP.
     - Tick `Allow programmatic and AWS Management Console Access`
     - The rest of the fields will autofill.
 
-        ![AWS Role](../assets/aws-role.png)
+        ![AWS Role](../assets/aws/aws-role.png)
 
     - Click `Next`. Here you may choose policies to associate with this role. Refer to [AWS documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-idp_saml.html) for further information. For this example, we are not choosing any policies, and instead clicking `Next`.
     - Role name: `Shibboleth-Dev`
@@ -161,7 +161,7 @@ Now we need to create an outbound SAML trust relationship from the Gluu Server t
     - SP metadata URL: `https://signin.aws.amazon.com/static/saml-metadata.xml`
     - Check the box next to `Configure relying party` and an additional box will pop up.
         - Click on `SAML2SSO` and click Add; then expand the SAML2 SSO Profile menu.
-        ![rp-config](../assets/rp-config.png)
+        ![rp-config](../assets/aws/rp-config.png)
 
         - Use the following values:
         - `includeAtributeStatemen`: yes
@@ -175,7 +175,7 @@ Now we need to create an outbound SAML trust relationship from the Gluu Server t
     - On the right hand side, under `Release additional attributes`, there is a list of attributes that can be released to this relationship. From those, choose the following:
         - From `gluuPerson`, click on `Email` and `Username`
         - From `gluuCustomPerson`, click on `RoleEntitlement` and `RoleSessionName`
-            ![aws-trust](../assets/aws-trust.png)
+            ![aws-trust](../assets/aws/aws-trust.png)
 4. Save this trust relationship. It will take some time to fully load, so please wait.
 
 ## Create the test user manually
@@ -186,11 +186,11 @@ First, we need to get some values from our AWS account. Log onto AWS.
 
 1. For the first value, navigate to `Roles` and click on the role you created for the SAML relationship. Copy the ARN, which for us is in the format `arn:aws:iam::XXXXXXXXXXXX:role/Shibboleth-Dev`, with numbers replacing the Xs. Note this down.
 
-    ![role-arn](../assets/role-arn.png)
+    ![role-arn](../assets/aws/role-arn.png)
 
 2. For the second value, navigate to `Identity providers` and click on the provider you created. Copy the ARN, which should be in a similar format. For us it is `arn:aws:iam::XXXXXXXXXXXX:saml-provider/Shibboleth`, with numbers replacing the Xs. Note this down as well.
 
-    ![iam-arn](../assets/iam-arn.png)
+    ![iam-arn](../assets/aws/iam-arn.png)
 
 3. From the oxTrust GUI, navigate to `Users` > `Add person`
 4. Our example values are as follows:
@@ -206,7 +206,7 @@ First, we need to get some values from our AWS account. Log onto AWS.
     - `RoleEntitlement`: The first value and the second value from steps 1 and 2, separated by a comma. For us it is `arn:aws:iam::XXXXXXXXXXXX:role/Shibboleth-Dev,arn:aws:iam::XXXXXXXXXXXX:saml-provider/Shibboleth`.
     - RoleSessionName: The email address that will be used to log onto AWS. We will use a dummy value, `bob@alice.example`.
 
-    ![new-user](../assets/new-user.png)
+    ![new-user](../assets/aws/new-user.png)
 
 5. Click Add. Our new user should look like this:
 
