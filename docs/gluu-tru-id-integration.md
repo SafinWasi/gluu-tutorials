@@ -44,8 +44,6 @@ This is where [Tru ID](https://tru.id/) comes in. They propose an alternate way 
 
 ![logged-in.png](../assets/tru-id/logged-in.png)
 
-
-
 This was tested using Gluu Server 4.4 and my Android 11 device using DuckDuckGo browser. Most modern Android (>=Android 9) and iOS devices already have QR scanning functionality built right into the camera software, so the only hard requirement on the device is a modern web browser.
 
 ## How to setup
