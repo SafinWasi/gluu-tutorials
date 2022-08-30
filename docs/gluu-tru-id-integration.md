@@ -1,4 +1,4 @@
-# Integrating Gluu Server with Tru ID
+# Integrating Gluu Server with tru.ID
 
 ## Introduction
 
