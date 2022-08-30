@@ -4,7 +4,7 @@
 
 It's a modern axiom that passwords are bad. But there are still many deployment challenges for organizations to rollout two-factor authentication, such as requiring end users to purchase hardware or install a special app on their smart phone. [tru.ID](https://tru.id/) has developed a technology that enables organizations to verify that a data connection associated with a SIM card is associated with the person's phone number. The advantage of this strategy is that nothing special is needed by the end user. They can use their mobile web browser and any QR scanner, now built-in to most camera apps. In order for this to work, the end user may have to switch-off their WiFi--tru.ID needs a data connection from the telco.
 
-This article will demonstrate the use of one such flow obtained by integrating the Tru ID's [sample app](https://github.com/tru-ID/oidc-bridge) with [Gluu Server CE 4.4.1](https://gluu.org/), your favorite open source digital identity platform. In our sample flow, the first factor (something you know) is username/password. The second factor (something you have) is obtained via tru.ID's PhoneCheck API, which verifies possession of the SIM card associated with the phone number.
+This article will demonstrate how to use [tru.ID](https://github.com/tru-ID/oidc-bridge) with [Gluu Server CE 4.4.1](https://gluu.org/), your favorite open source digital identity platform. In our sample flow, the first factor (something you know) is username/password. The second factor (something you have) is obtained via tru.ID's PhoneCheck API, which verifies possession of the SIM card associated with the phone number.
 
 In our demo setup, we are using a sample `oidc-bridge` provided by tru.ID, which runs as a separate service/container.
 
